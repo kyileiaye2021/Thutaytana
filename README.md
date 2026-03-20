@@ -1,2 +1,3 @@
-# ConferPilotAI
-ConferPilot helps researchers through the entire conference submission journey from searching conferences to validated submission.
+# Thutaytana
+
+Thutaytana is an AI-agent based tool that assists researchers automate the processes of creating posters and presentation slides for the research conferences.
