@@ -1,7 +1,7 @@
 # define exact instruction what we want to give AI
 
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import Literal, List, Optional
 
 class ResearchContext(BaseModel):
     """
@@ -11,21 +11,40 @@ class ResearchContext(BaseModel):
         BaseModel (class): a parent class that provides the behavior
     """
     title: str = Field(description="Official title about the research that is reflecting the main goal of the research project")
-    abstract: str = Field(description="The research abstract. If the provided text lacks an abstract, generate a 200-word one summarizing the context.")
+    introduction: str = Field(description="A bit background about research context")
     problem_gap: str = Field(description="The specific academic or technical gap this research attempts to solve.")
     methodology: str = Field(description="A concise summary of the methods, algorithms, or experiments used to solve the research topic or problem.")
     key_res: List[str] = Field(description="A list of critical findings, metrics, or outcomes for research problem.")
     conclusion: str = Field(description="The primary takeaway or future work suggested for the resaerch project.")
+    abstract: str = Field(description="The research abstract. If the provided text lacks an abstract, generate a 200-word one summarizing the context.")
     special_focus: str = Field(description="The user's stated goal (poster or presentation slides).")
 
-class FigureMetadata(BaseModel):
+class FigureDetails(BaseModel):
     """
-    Defining schema for the structure of how figure descriptions were be generated.
+    Defining schema for the structure of how figure descriptions were be generated for an image
 
     Args:
         BaseModel (class): _a parent class that provides behavior
     """
-    figure_descriptions: List[str] = Field(description="A list of detailed description for each figure, including extracted metrics, relationships, and context from the paper.")
+    image_filename: str = Field(description="The filename provided")
+    
+    # For text parser 
+    detailed_analysis: str = Field(description="Deep explanation of the figure, trends, extracted metrics, and context. Used for writing the abstract.")
+    extracted_metrics: List[str] = Field(description="Specific numbers, percentages, or p-values.")
+    
+    # For the poster agent 
+    suggested_section: Literal["Introduction", "Problem Gap", "Methodology", "Results/Findings", "Conclusion", "Exclude"] = Field(
+        description="Categorize where this image belongs on a scientific poster. Use 'Exclude' if it is just a decorative logo.")
+    
+    figure_caption: List[str] = Field(description="A very short, 1-sentence punchy caption to display directly under the image on the poster.")
+    
+class FigureMetadata(BaseModel):
+    """
+    Define the OUTER schema that holds the list of images
+    Container for all analyzed figures from the document.
+    """
+    figures: List[FigureDetails] = Field(description="A list of all the figures analyzed and their metadata.")
+    
     
 class FontConstraints(BaseModel):
     # to fix the error of the structured output of open ai

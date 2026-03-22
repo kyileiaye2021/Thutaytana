@@ -30,17 +30,21 @@ def research_figure_parser(raw_text, image_blobs):
     alongside the paper's text and extract high-fidelity descriptions of what the figures show.
     
     Rules:
+    - CRITICAL: For each figure, you MUST include the exact 'image_filename' provided in the prompt text.
     - Use the provided text to figure out what the acronyms or labels in the images mean.
-    - Extract quantitative data: axes, legends, p-values.
+    - Extract quantitative data (axes, legends, p-values) into `extracted_metrics`.
+    - Write a deep `detailed_analysis` that will be used by another AI to write the abstract.
     - If a figure caption is given, use it to ground your interpretation. If not, try to understand the figure based on the research context and generate metadata.
-    - Return a list of clear figure descriptions."""
+    - Write a short, punchy `poster_caption` suitable for a PowerPoint slide.
+    - Categorize the figure into the most logical `suggested_section` (Introduction, Problem Gap, Methodology, Results/Findings, Conclusion, or Exclude)."""
     
     # constructing multimodal list 
     # info provided by users
     user_content = [
         {"type": "text", "text": f"Raw Research Context: {raw_text}\n\nAnalyze these images based on the text above:"}
     ]
-    for img in image_blobs:
+    for filename, img in image_blobs.items():
+        user_content.append({"type": "text", "text": f"\n--- Start of Image: {filename} ---"})
         user_content.append({"type": "image_url", "image_url":img})
         
     # multimodal prompting
@@ -51,7 +55,7 @@ def research_figure_parser(raw_text, image_blobs):
         ]
     )
     
-    return prompt.figure_descriptions # Returns a List of figure descriptions from the research context
+    return prompt.figures # Returns a List of figure descriptions from the research context
 
 def research_context_parser():
     """
@@ -72,16 +76,21 @@ def research_context_parser():
     Your job is to analyze raw research text, notes, and user goals, and extract a structured summary.
     
     Rules:
-    1. Be precise and academic in your tone.
-    2. If a research abstract is missing from the raw text, you must create one based on the given research context 
-       by including what the research is about, what problem gap the research is trying to solve, what methods are used,
-       what outcomes/achievements are resulted in, what are the future directions.
+    1. Be precise, formal, and academic in your tone.
+    2. If a research abstract is missing in the raw text, you must create one based on the given research context using:
+       - research objective
+       - problem gap
+       - methodology
+       - key results (with metrics)
+       - conclusions and implications
     3. Extract concrete metrics for the results wherever possible.
+    4. You MUST integrate quantitative insights from the provided 'Figure Descriptions' into your summary, especially in the Results section.
+    5. Ensure logical coherence across sections; each section should naturally build on the previous one.
     
     When writing the research abstract, you must mimic the writing style, sentence structure, and tone provided in the 
-    <style_guide> for each specific section.
+    <style_guide> for each specific section. You may combine the Results and Conclusion sections if appropriate, but preserve clarity of contributions and impact.
     
-    <study_guide>
+    <style_guide>
         <section name="Introduction">
             <description>1-2 sentences establishing the research area and the primary challenge.</description>
             <example>
@@ -109,14 +118,22 @@ def research_context_parser():
         </section>
         
         <section name="Results/Findings">
-            <description>1-2 sentences highlighting concrete achievements and their broader impact.</description>
+           <description>1-2 sentences highlighting concrete findings with quantitative metrics.</description>
             <example>
                 Experimental results indicate that the hybrid model maintains a 94% F1-score in lesion classification—comparable to state-of-the-art purely neural models 
                 while increasing the 'Explanatory Satisfaction' score among participating clinicians by 42%. These findings suggest that neuro-symbolic integration provides 
                 a viable path toward trustworthy, interpretable AI without sacrificing the performance necessary for clinical adoption.
             </example>
         </section>
-    </study_guide>
+        
+        <section name="Conclusion">
+        <description>1-2 sentences summarizing key contributions, connecting results to the research objective, and highlighting broader impact or future implications.</description>
+        <example>
+            These results demonstrate that integrating interpretable reasoning mechanisms with high-performance learning models can effectively bridge the gap between accuracy and transparency in clinical AI systems. 
+            More broadly, this work establishes a scalable foundation for deploying trustworthy, human-aligned decision-support systems in high-stakes medical environments.
+        </example>
+    </section>       
+    </style_guide>
     
     """
     
@@ -131,34 +148,57 @@ def research_context_parser():
     
     return parser_chain
 
-sample_raw_research_text = """"""
+sample_raw_research_text = """
+A traditional biopsy method used for investigating cancer-suspicious skin tissue, while effective, is invasive and time-consuming. It includes multiple processing steps to produce Hematoxylin & Eosin (H&E) images, which are gold standard for cancer diagnosis. Recently, a virtual biopsy has emerged as a non-invasive alternative that produces two-dimensional grayscale Optical Coherence Tomography (OCT) images by simply scanning live tissue. However, interpreting OCT images requires extensive specialized training for pathologists, which makes the virtual biopsy limited in clinical settings. We developed a vision-language model capable of interpreting OCT images for tissue classifications without manual annotations by  fine-tuning the Multimodal transformer with Unified maSKed modeling (MUSK), a vision-language model originally pre-trained on H&E images, using a knowledge distillation approach. By training the model on approximately 500 H&E-OCT image pairs, we reduced the domain gap between H&E image embeddings (feature representations) from original MUSK vision encoder (teacher model) and OCT image embeddings from fine-tuned MUSK vision encoder (student model). We achieved 72% accuracy improvement in OCT in skin tissue classification.
+"""
+# A traditional biopsy method used for investigating cancer-suspicious skin tissue, while effective, is invasive and time-consuming. It includes multiple processing steps to produce Hematoxylin & Eosin (H&E) images, which are gold standard for cancer diagnosis. Recently, a virtual biopsy has emerged as a non-invasive alternative that produces two-dimensional grayscale Optical Coherence Tomography (OCT) images by simply scanning live tissue. However, interpreting OCT images requires extensive specialized training for pathologists, which makes the virtual biopsy limited in clinical settings. Moreover, the scarcity of annotated OCT datasets has hindered the development of useful foundation models to assist pathologists examining these OCT images. In this study, we developed a vision-language model capable of interpreting OCT images for tissue classifications without manual annotations. We fine-tuned the Multimodal transformer with Unified maSKed modeling (MUSK), a vision-language model originally pre-trained on H&E images, using a knowledge distillation approach. By training the model on approximately 500 H&E-OCT image pairs, we reduced the domain gap between H&E image embeddings (feature representations) from original MUSK vision encoder (teacher model) and OCT image embeddings from fine-tuned MUSK vision encoder (student model). We achieved around 72% accuracy increase in skin tissue classification in OCT images. This significant gain in accuracy highlights the model’s potential to support pathologists in interpreting OCT scans and enhance the clinical viability of non-invasive cancer diagnosis.
+
 
 user_focus = "poster"
 with open("./non-invasive cancer.png", "rb") as image_file:
     encoded_str = base64.b64encode(image_file.read()).decode('utf-8')
     # add data URI prefix to tell api what kind of media files those chars represent;; otherwise the api will reject it or read it as gibberish
     formatted_image_uri = f"data:image/png;base64,{encoded_str}"
-extracted_images = [formatted_image_uri]
+    
+with open("./musk.png", "rb") as image_file:
+    encoded_str2 = base64.b64encode(image_file.read()).decode('utf-8')
+    # add data URI prefix to tell api what kind of media files those chars represent;; otherwise the api will reject it or read it as gibberish
+    formatted_image_uri2 = f"data:image/png;base64,{encoded_str2}"
+    
+extracted_images = {
+    'non-invasive cancer.png': formatted_image_uri, 
+    'musk-model.png': formatted_image_uri2
+    }
 
 if extracted_images:
     vision_metadata = research_figure_parser(sample_raw_research_text, extracted_images)
 else:
     vision_metadata = "No figures present in this document"
-print(vision_metadata)
+# print(vision_metadata)
+
+for img in vision_metadata:
+    print(f"File: {img.image_filename}")
+    print(f"Section: {img.suggested_section}")
+    print(f"Caption: {img.figure_caption}")
+    print(f"Deep Analysis: {img.detailed_analysis}")
+    print()
 
 # agent = research_context_parser()
 # # run the agent 
 # print("running research parser...")
 # res = agent.invoke({
 #     "user_goal": user_focus,
-#     "raw_text": sample_raw_research_text
+#     "raw_text": sample_raw_research_text,
+#     "vision_metadata": vision_metadata
 # })
 
 # print("\n--- Parsed Output ---")
 # print(f"Title: {res.title}\n")
+# print(f"Introduction: {res.introduction}")
 # print(f"Problem Gap: {res.problem_gap}\n")
 # print(f"Methodologies: {res.methodology}\n")
 # print(f"Results: {res.key_res}\n")
+# print(f"Conclusion: {res.conclusion}\n")
 # print(f"Abstract: {res.abstract}\n")
 
     
