@@ -1,7 +1,7 @@
 # define exact instruction what we want to give AI
 
 from pydantic import BaseModel, Field
-from typing import List, Dict, Optional
+from typing import List, Optional
 
 class ResearchContext(BaseModel):
     """
@@ -18,6 +18,15 @@ class ResearchContext(BaseModel):
     conclusion: str = Field(description="The primary takeaway or future work suggested for the resaerch project.")
     special_focus: str = Field(description="The user's stated goal (poster or presentation slides).")
 
+class FigureMetadata(BaseModel):
+    """
+    Defining schema for the structure of how figure descriptions were be generated.
+
+    Args:
+        BaseModel (class): _a parent class that provides behavior
+    """
+    figure_descriptions: List[str] = Field(description="A list of detailed description for each figure, including extracted metrics, relationships, and context from the paper.")
+    
 class FontConstraints(BaseModel):
     # to fix the error of the structured output of open ai
     body_min_size: str = Field(description="Minimum body font size. Return 'None' if missing.", default="None")
