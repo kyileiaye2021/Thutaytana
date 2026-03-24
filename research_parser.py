@@ -196,58 +196,58 @@ Conclusion: The hybrid routing approach successfully maintains the high accuracy
 # A traditional biopsy method used for investigating cancer-suspicious skin tissue, while effective, is invasive and time-consuming. It includes multiple processing steps to produce Hematoxylin & Eosin (H&E) images, which are gold standard for cancer diagnosis. Recently, a virtual biopsy has emerged as a non-invasive alternative that produces two-dimensional grayscale Optical Coherence Tomography (OCT) images by simply scanning live tissue. However, interpreting OCT images requires extensive specialized training for pathologists, which makes the virtual biopsy limited in clinical settings. Moreover, the scarcity of annotated OCT datasets has hindered the development of useful foundation models to assist pathologists examining these OCT images. In this study, we developed a vision-language model capable of interpreting OCT images for tissue classifications without manual annotations. We fine-tuned the Multimodal transformer with Unified maSKed modeling (MUSK), a vision-language model originally pre-trained on H&E images, using a knowledge distillation approach. By training the model on approximately 500 H&E-OCT image pairs, we reduced the domain gap between H&E image embeddings (feature representations) from original MUSK vision encoder (teacher model) and OCT image embeddings from fine-tuned MUSK vision encoder (student model). We achieved around 72% accuracy increase in skin tissue classification in OCT images. This significant gain in accuracy highlights the model’s potential to support pathologists in interpreting OCT scans and enhance the clinical viability of non-invasive cancer diagnosis.
 
 
-user_focus = "poster"
-with open("./RAG.png", "rb") as image_file:
-    encoded_str = base64.b64encode(image_file.read()).decode('utf-8')
-    # add data URI prefix to tell api what kind of media files those chars represent;; otherwise the api will reject it or read it as gibberish
-    formatted_image_uri = f"data:image/png;base64,{encoded_str}"
+# user_focus = "poster"
+# with open("./RAG.png", "rb") as image_file:
+#     encoded_str = base64.b64encode(image_file.read()).decode('utf-8')
+#     # add data URI prefix to tell api what kind of media files those chars represent;; otherwise the api will reject it or read it as gibberish
+#     formatted_image_uri = f"data:image/png;base64,{encoded_str}"
     
-with open("./RAG_2.png", "rb") as image_file:
-    encoded_str2 = base64.b64encode(image_file.read()).decode('utf-8')
-    # add data URI prefix to tell api what kind of media files those chars represent;; otherwise the api will reject it or read it as gibberish
-    formatted_image_uri2 = f"data:image/png;base64,{encoded_str2}"
+# with open("./RAG_2.png", "rb") as image_file:
+#     encoded_str2 = base64.b64encode(image_file.read()).decode('utf-8')
+#     # add data URI prefix to tell api what kind of media files those chars represent;; otherwise the api will reject it or read it as gibberish
+#     formatted_image_uri2 = f"data:image/png;base64,{encoded_str2}"
     
-with open("./RAG_3.png", "rb") as image_file:
-    encoded_str3 = base64.b64encode(image_file.read()).decode('utf-8')
-    # add data URI prefix to tell api what kind of media files those chars represent;; otherwise the api will reject it or read it as gibberish
-    formatted_image_uri3 = f"data:image/png;base64,{encoded_str3}"
+# with open("./RAG_3.png", "rb") as image_file:
+#     encoded_str3 = base64.b64encode(image_file.read()).decode('utf-8')
+#     # add data URI prefix to tell api what kind of media files those chars represent;; otherwise the api will reject it or read it as gibberish
+#     formatted_image_uri3 = f"data:image/png;base64,{encoded_str3}"
     
-extracted_images = {
-    'RAG': formatted_image_uri, 
-    'RAG_2': formatted_image_uri2,
-    'RAG_3': formatted_image_uri3
-    }
-# extracted_images = None
-if extracted_images:
-    vision_metadata = research_figure_parser(sample_raw_research_text, extracted_images)
-else:
-    vision_metadata = None
-# print(vision_metadata)
+# extracted_images = {
+#     'RAG': formatted_image_uri, 
+#     'RAG_2': formatted_image_uri2,
+#     'RAG_3': formatted_image_uri3
+#     }
+# # extracted_images = None
+# if extracted_images:
+#     vision_metadata = research_figure_parser(sample_raw_research_text, extracted_images)
+# else:
+#     vision_metadata = None
+# # print(vision_metadata)
 
-for img in vision_metadata:
-    print(f"File: {img.image_filename}")
-    print(f"Section: {img.suggested_section}")
-    print(f"Caption: {img.figure_caption}")
-    print(f"Deep Analysis: {img.detailed_analysis}")
-    print()
+# for img in vision_metadata:
+#     print(f"File: {img.image_filename}")
+#     print(f"Section: {img.suggested_section}")
+#     print(f"Caption: {img.figure_caption}")
+#     print(f"Deep Analysis: {img.detailed_analysis}")
+#     print()
 
-agent = research_context_parser()
-# run the agent 
-print("running research parser...")
-res = agent.invoke({
-    "user_goal": user_focus,
-    "raw_text": sample_raw_research_text,
-    "vision_metadata": vision_metadata
-})
+# agent = research_context_parser()
+# # run the agent 
+# print("running research parser...")
+# res = agent.invoke({
+#     "user_goal": user_focus,
+#     "raw_text": sample_raw_research_text,
+#     "vision_metadata": vision_metadata
+# })
 
-print("\n--- Parsed Output ---")
-print(f"Title: {res.title}\n")
-print(f"Introduction: {res.introduction}")
-print(f"Problem Gap: {res.problem_gap}\n")
-print(f"Research Goal: {res.research_goal}\n")
-print(f"Methodologies: {res.methodology}\n")
-print(f"Results: {res.key_res}\n")
-print(f"Conclusion: {res.conclusion}\n")
-print(f"Abstract: {res.abstract}\n")
+# print("\n--- Parsed Output ---")
+# print(f"Title: {res.title}\n")
+# print(f"Introduction: {res.introduction}")
+# print(f"Problem Gap: {res.problem_gap}\n")
+# print(f"Research Goal: {res.research_goal}\n")
+# print(f"Methodologies: {res.methodology}\n")
+# print(f"Results: {res.key_res}\n")
+# print(f"Conclusion: {res.conclusion}\n")
+# print(f"Abstract: {res.abstract}\n")
 
     
