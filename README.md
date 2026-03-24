@@ -9,6 +9,8 @@ Users are allowed to generate research abstract and poster.
 - User input
 - Reading research context (image + text)
 - Generate research abstract from research context + detailed analysis of images
+- Generate bullet points for each section for the poster
 - Creating a poster based on parsed research context + captions of images
 - Give feedback or edit on poster
 - Creating presentation slides 
+- Give feedback or edit on presentation slides
