@@ -32,23 +32,5 @@ def conference_parser():
     
     return prompt | structured_llm
 
-conference_guidelines = """
-
-    FOR ALL POSTERS:
-    Please review Stanford’s Make a Good Poster page.
-    Dimensions of your poster: 42 inches (wide) by 36 inches (height).
-    
-    SUBMISSION FILE FORMAT: .PDF 
-    If you are submitting your poster with your application for printing, save the final poster in .pdf format and submit the PDF version.
-    """
-conference_rule_agent = conference_parser()
-conference_rules = conference_rule_agent.invoke(conference_guidelines)
-print("---Parsed Conference Rules---")
-print(f"Format Type: {conference_rules.format_type}")
-print(f"Dimension of poster: {conference_rules.dimensions}")
-print(f"Required Sections: {conference_rules.required_sections}")
-print(f"Word Limit for abstract: {conference_rules.word_limits}")
-    
-
 
     
