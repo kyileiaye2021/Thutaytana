@@ -102,10 +102,11 @@ def generate_poster(poster_content, vision_metadata, conference_rules, output_na
     
     # Add a Blank Slide Canvas
     slide = prs.slides.add_slide(prs.slide_layouts[6])
-    margin = Inches(1.5)
+    margin = Inches(1.5) # Outer border of the poster
     
     # add title (spanning across the top)
     title_box = slide.shapes.add_textbox(margin, margin, poster_width - (margin * 2), Inches(2))
+    title_box.text_frame.word_wrap = True # fix the title running over the poster size
     title_p = title_box.text_frame.paragraphs[0]
     title_p.text = poster_content.title
     title_p.font.bold = True
@@ -114,9 +115,20 @@ def generate_poster(poster_content, vision_metadata, conference_rules, output_na
              
     sections_dict = poster_content.model_dump() # converting pydantic object into dict
     
-    left_margin = Inches(1.5)
-    current_y = Inches(3)
-    col_width = Inches(12)
+    gap = Inches(1.0) # Blank space between columns
+    num_columns = 3 # Most scientific posters use 3 columns
+    
+    # Calculate exactly how wide a column should be to perfectly fit the poster
+    usable_width = poster_width - (margin * 2) - (gap * (num_columns - 1))
+    col_width = usable_width / num_columns
+    
+    # Define vertical boundaries
+    start_y = Inches(4.5)      # Start below the main title
+    max_height = poster_height - margin # Don't draw past the bottom margin
+    
+    # set starting coordinates
+    current_x = margin
+    current_y = start_y
     
     for section_key, bullets in sections_dict.items():
         
@@ -124,26 +136,47 @@ def generate_poster(poster_content, vision_metadata, conference_rules, output_na
         if section_key == 'title' or not bullets:
             continue
         
-        section_title = section_key.replace("_bullets", "").replace("_", " ").title() # extracting each section title
+        section_title = section_key.replace("_bullets", "").replace("_", " ").title() # extracting each section title; e.g. from introduction_bullets --> Introduction
+        base_word = section_title.split()[0].lower()
         
-        current_y = add_section(slide, section_title, bullets, left_margin, current_y, col_width, body_size=24, title_size=40)
+        # height estimation (to know when to move to the next column)
+        total_chars = sum(len(b) for b in bullets)
+        estimated_height = Inches(1.5) + (total_chars / 50 * Inches(0.3)) + (len(bullets) * Inches(0.1))
         
+        # added estimated image height if this section has an image
         if vision_metadata:
             for img in vision_metadata:
-                if img.suggested_section.lower() in section_title.lower():
+                if base_word in img.suggested_section.lower():
+                    # estimate image height based on the dynamic column width
+                    estimated_height += col_width * 0.6 + Inches(0.5)
+                        
+         # the wrapping logic
+         # if drawing this section goes off the bottom of the poster, jump to the next column         
+        if (current_y + estimated_height) > max_height:
+             current_y = start_y # reset to the top
+             current_x += col_width + gap # shift X to the right
+        
+        # draw the text
+        current_y = add_section(slide, section_title, bullets, current_x, current_y, col_width)
+
+        # draw the images
+        if vision_metadata:
+            for img in vision_metadata:
+                if base_word in img.suggested_section.lower():
                     try:
                         picture = slide.shapes.add_picture(
                             img.image_filename,
-                            left_margin,
-                            current_y, 
-                            width=col_width
+                            current_x,
+                            current_y,
+                            width = col_width
                         )
+                        current_y += picture.height + Inches(0.2)
                         
-                        current_y += picture.height + Inches(0.1)
-                    
                     except FileNotFoundError:
-                        print(f"Coundn't find image file at path: {img.image_filename}")
-    
+                        print(f"Couldn't find image file at path: {img.image_filename} ")
+        
+        # add a little padding before the next section starts
+        current_y += Inches(0.4)
     prs.save(output_name)
     print(f"✅ Success! Saved final poster as: {output_name}")
     
@@ -153,7 +186,7 @@ def main():
     conference_guidelines = """
     FOR ALL POSTERS:
     Please review Stanford’s Make a Good Poster page.
-    Dimensions of your poster: 42 inches (wide) by 36 inches (height).
+    Dimensions of your poster: 42 inches (wide) by 26 inches (height).
     
     SUBMISSION FILE FORMAT: .PDF 
     If you are submitting your poster with your application for printing, save the final poster in .pdf format and submit the PDF version.
@@ -163,6 +196,7 @@ def main():
     print("---Parsed Conference Rules---")
     print(f"Format Type: {conference_rules.format_type}")
     print(f"slide width: {conference_rules.width_inches}")
+    print(f"slide height: {conference_rules.height_inches}")
     print(f"Required Sections: {conference_rules.required_sections}")
     print(f"Word Limit for abstract: {conference_rules.word_limits}")
     
