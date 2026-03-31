@@ -38,7 +38,7 @@ def poster_formatter_agent():
     ])
     return prompt | structured_llm
     
-def add_section(slide, title, bullet_list, left, top, width, body_size=24, title_size=40):
+def add_section(slide, title, bullet_list, left, top, width, body_size=32, title_size=48):
     """
     Helper func to draw a text box with a bold header
 
@@ -68,16 +68,27 @@ def add_section(slide, title, bullet_list, left, top, width, body_size=24, title
     # body - loop thru the bullet points
     for bullet_text in bullet_list:
         p_body = text_frame.add_paragraph()
-        p_body.text = bullet_text
+        p_body.text = f"• {bullet_text}"
         p_body.font.size = Pt(body_size)
         
         p_body.level = 1 # turns the paragraph into a bullet point!
     
     # Estimate height to push the next section down
-    # 1. Sum up all the chars in the list
-    total_chars = sum(len(b) for b in bullet_list)
-    # 2. Calculate height: base header height + (text wrapping math) + a little padding per bullet
-    estimated_hei = Inches(1.5) + (total_chars / 50 * Inches(0.3)) + (len(bullet_list) * Inches(0.1))
+    
+    # Convert EMUs back to inches manually (1 inch = 914400 EMUs)
+    width_in_inches = width / 914400 # have to convert to the inches as the python pptx uses EMU 
+    
+    chars_per_line = int(width_in_inches * 3.0)
+    
+    total_lines = 0
+    for b in bullet_list:
+        # calculate how many lines this specific bullet point will take up
+        text_length = len(b) + 3
+        lines = (text_length // chars_per_line) + 1
+        total_lines += lines
+    
+    # 2. Base header height (1.5") + (lines * height per lines) + padding
+    estimated_hei = Inches(1.0) + (total_lines * Inches(0.6))
     
     return top + estimated_hei
 
@@ -140,19 +151,29 @@ def generate_poster(poster_content, vision_metadata, conference_rules, output_na
         base_word = section_title.split()[0].lower()
         
         # height estimation (to know when to move to the next column)
-        total_chars = sum(len(b) for b in bullets)
-        estimated_height = Inches(1.5) + (total_chars / 50 * Inches(0.3)) + (len(bullets) * Inches(0.1))
+        # total_chars = sum(len(b) for b in bullets)
+        # estimated_height = Inches(1.5) + (total_chars / 50 * Inches(0.3)) + (len(bullets) * Inches(0.1))
         
         # added estimated image height if this section has an image
+        image_to_draw = None
         if vision_metadata:
             for img in vision_metadata:
                 if base_word in img.suggested_section.lower():
                     # estimate image height based on the dynamic column width
-                    estimated_height += col_width * 0.6 + Inches(0.5)
-                        
+                    image_to_draw = img
+                    break
+        
+        # for text
+        estimated_text_height = Inches(1.5) + (sum(len(b) for b in bullets) / 50 * Inches(0.55))
+        
+        # for image
+        estimated_img_height = (col_width * 0.75) if image_to_draw else 0
+        
+        total_estimated_height = estimated_text_height + estimated_img_height
+        
          # the wrapping logic
          # if drawing this section goes off the bottom of the poster, jump to the next column         
-        if (current_y + estimated_height) > max_height:
+        if (current_y + total_estimated_height) > max_height:
              current_y = start_y # reset to the top
              current_x += col_width + gap # shift X to the right
         
@@ -160,23 +181,21 @@ def generate_poster(poster_content, vision_metadata, conference_rules, output_na
         current_y = add_section(slide, section_title, bullets, current_x, current_y, col_width)
 
         # draw the images
-        if vision_metadata:
-            for img in vision_metadata:
-                if base_word in img.suggested_section.lower():
-                    try:
-                        picture = slide.shapes.add_picture(
-                            img.image_filename,
-                            current_x,
-                            current_y,
-                            width = col_width
-                        )
-                        current_y += picture.height + Inches(0.2)
+        if image_to_draw:
+            try:
+                picture = slide.shapes.add_picture(
+                    image_to_draw.image_filename,
+                    current_x,
+                    current_y,
+                    width = col_width
+                )
+                current_y += picture.height + Inches(0.2)
                         
-                    except FileNotFoundError:
-                        print(f"Couldn't find image file at path: {img.image_filename} ")
+            except FileNotFoundError:
+                print(f"Couldn't find image file at path: {img.image_filename} ")
         
         # add a little padding before the next section starts
-        current_y += Inches(0.4)
+        current_y += Inches(0.2)
     prs.save(output_name)
     print(f"✅ Success! Saved final poster as: {output_name}")
     
@@ -186,7 +205,7 @@ def main():
     conference_guidelines = """
     FOR ALL POSTERS:
     Please review Stanford’s Make a Good Poster page.
-    Dimensions of your poster: 42 inches (wide) by 26 inches (height).
+    Dimensions of your poster: 48 inches (wide) by 36 inches (height).
     
     SUBMISSION FILE FORMAT: .PDF 
     If you are submitting your poster with your application for printing, save the final poster in .pdf format and submit the PDF version.
