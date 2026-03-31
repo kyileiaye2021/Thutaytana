@@ -32,7 +32,7 @@ def poster_formatter_agent():
     """
     prompt = ChatPromptTemplate([
         ("system", system_instructions),
-        ("user", """Format this research data for a poster:\n Title: {title}\nIntro: {intro}\nProblem: {problem}
+        ("user", """Format this research data for a poster:\n Title: {title}\nIntro: {introduction}\nProblem: {problem}
          \nResearch Goals: {research_goals}\nMethods: {methods}\nResults: {results}\n Conclusion: {conclusion}
          """)
     ])
@@ -112,7 +112,7 @@ def generate_poster(poster_content, vision_metadata, conference_rules, output_na
     title_p.font.size = Pt(60)
     title_p.alignment = PP_ALIGN.CENTER
              
-    sections_dict = poster_content.dict() # converting pydantic object into dict
+    sections_dict = poster_content.model_dump() # converting pydantic object into dict
     
     left_margin = Inches(1.5)
     current_y = Inches(3)
@@ -124,7 +124,7 @@ def generate_poster(poster_content, vision_metadata, conference_rules, output_na
         if section_key == 'title' or not bullets:
             continue
         
-        section_title = section_key.replace("_bullets", "") # extracting each section title
+        section_title = section_key.replace("_bullets", "").replace("_", " ").title() # extracting each section title
         
         current_y = add_section(slide, section_title, bullets, left_margin, current_y, col_width, body_size=24, title_size=40)
         
@@ -266,7 +266,7 @@ def main():
     poster_agent = poster_formatter_agent()
     bullet_points = poster_agent.invoke({
         'title': res.title,
-        'intro': res.introduction,
+        'introduction': res.introduction,
         'problem': res.problem_gap,
         'research_goals': res.research_goal,
         'methods': res.methodology,
@@ -277,7 +277,7 @@ def main():
     print("Parsiing bullet points for poster")
     print("\n--- Parsed Bullet Points for poster ---")
     print(f"Title: {bullet_points.title}\n")
-    print(f"Introduction: {bullet_points.intro_bullets}")
+    print(f"Introduction: {bullet_points.introduction_bullets}")
     print(f"Problem Gap: {bullet_points.problem_gap_bullets}\n")
     print(f"Research Goal: {bullet_points.research_goal_bullets}\n")
     print(f"Methodologies: {bullet_points.method_bullets}\n")
