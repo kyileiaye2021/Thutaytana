@@ -35,7 +35,7 @@ class FigureDetails(BaseModel):
     extracted_metrics: List[str] = Field(description="Specific numbers, percentages, or p-values.")
     
     # For the poster agent 
-    suggested_section: Literal["Introduction", "Problem Gap", "Methodology", "Results/Findings", "Conclusion", "Exclude"] = Field(
+    suggested_section: Literal["Introduction", "Problem Gap", "Research Goal", "Method", "Result", "Conclusion", "Exclude"] = Field(
         description="Categorize where this image belongs on a scientific poster. Use 'Exclude' if it is just a decorative logo.")
     
     figure_caption: List[str] = Field(description="A very short, 1-sentence punchy caption to display directly under the image on the poster.")
@@ -75,7 +75,7 @@ class ConferenceRules(BaseModel):
 
 class PosterBulletPoints(BaseModel):
     title: str = Field(description="The original title")
-    intro_bullets: List[str] = Field(description="2-3 extremely concise, short bullet points for Introduction.")
+    introduction_bullets: List[str] = Field(description="2-3 extremely concise, short bullet points for Introduction.")
     problem_gap_bullets: List[str] = Field(description="1-2 extremely concise, short bullet points for Problem Gap.")
     research_goal_bullets: List[str] = Field(description="2-3 extremely concise, short bullet points for Research Goals.")
     method_bullets: List[str] = Field(description="3-4 extremely concise, short bullet points for Methodologies.")
