@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Poster Generator</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        {# Simple CSS to hide the loading spinner by default  #} 
+        .htmx-indicator{ display: none;}
+        .htmx-request .htmx-indicator {display: block;}
+        htmx-request.htmx-indicator { display: block; }
+    </style>
+</head>
+<body class = "bg-gray-50 p-8 font-sans text-gray-800">
+    <div class = "max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="bg-white p-6 rounded-lg shadow-md h-fit">
+            <h1 class="text-2xl font-bold mb-6 text-blue-600">🔬 AI Poster Generator</h1>
+
+            <form hx-post="/api/draft"
+                hx-encoding="multipart/form-data" 
+                hx-target="#ai-response-container"
+                hx-indicator="#loading-spinner">
+
+                {# for text #}
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2">1. Paste Research Text</label>
+                    <textarea name="raw_text" required rows="8" class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Paste your methodology, results, abstract..."></textarea>
+                </div>
+
+                {# for Figures #}
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2">2. Upload Figures (Optional)</label>
+                    <input type="file" name="images" multiple accept="image/*" class="w-full p-2 border rounded">
+                </div>
+
+                <input type="hidden" name="user_focus" value="poster">
+
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded hover:bg-blue-700 transition duration-200">
+                    Generate Poster Draft
+                </button>
+            </form>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md min-h-[500px]">
+            <h2 class="text-xl font-bold mb-4 border-b pb-2">Poster Draft</h2>
+            
+            <div id="loading-spinner" class="htmx-indicator text-center py-10">
+                <p class="text-blue-500 font-bold animate-pulse">🤖 AI is analyzing research and routing images...</p>
+            </div>
+
+            <div id="ai-response-container">
+                <p class="text-gray-400 italic mt-10 text-center">Your generated poster sections will appear here.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<div class = "space-y-4 animate-fade-in">
+    <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase">Title</label>
+        <div class="p-3 bg-blue-50 border border-blue-100 rounded text-lg font-bold">
+            {{ bullets.title }}
+        </div>
+    </div>
+
+    <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase">Introduction</label>
+        <ul class="list-disc pl-5 text-sm space-y-1">
+            {% for bullet in bullets.introduction %}
+                <li>{{ bullet }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase">Problem / Gap</label>
+        <ul class="list-disc pl-5 text-sm space-y-1">
+            {% for bullet in bullets.problem %}
+                <li>{{ bullet }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase">Methodology</label>
+        <ul class="list-disc pl-5 text-sm space-y-1">
+            {% for bullet in bullets.methods %}
+                <li>{{ bullet }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase">Results</label>
+        <ul class="list-disc pl-5 text-sm space-y-1">
+            {% for bullet in bullets.results %}
+                <li>{{ bullet }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase">Conclusion</label>
+        <ul class="list-disc pl-5 text-sm space-y-1">
+            {% for bullet in bullets.conclusion %}
+                <li>{{ bullet }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    {% if vision_metadata %}
+    <div class= "mt-8 border-t-2 pt-6">
+        <label class="block text-xs font-bold text-indigo-500 uppercase mb-3">Analyzed Figures</label>
+        <div class="grid grid-cols-1 gap-4">
+
+            {% for figure in vision_metadata %}
+            <div class="p-4 bg-indigo-50 border border-indigo-100 rounded-lg shadow-sm">
+                <p class="font-bold text-indigo-900 text-sm mb-1">Figure Analysis</p>
+                <p class="text-sm text-gray-800"><strong>Caption:</strong> {{ figure.caption }}</p>
+                <p class="text-xs text-gray-600 mt-2"><strong>AI Summary:</strong> {{ figure.summary }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <button class="w-full mt-6 bg-green-600 text-white font-bold py-2 rounded hover:bg-green-700">
+        Export to .PPTX
+    </button>
+
+</div>
