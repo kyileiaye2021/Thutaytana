@@ -77,13 +77,27 @@
     {% endif %}
 
     <form action="/api/download-pptx" method="POST">
-        <input type="hidden" name="title" values="{{bullets.title}}">
-        <input type="hidden" name="results" value="{{ bullets.introduction_bullets | join('\n') }}">
-        <input type="hidden" name="results" value="{{ bullets.problem_gap_bullets | join('\n') }}">
-        <input type="hidden" name="results" value="{{ bullets.research_goal_bullets | join('\n') }}">
-        <input type="hidden" name="methods" values"{{bullets.method_bullets | join('\n')}}">
-        <input type="hidden" name="results" value="{{ bullets.result_bullets | join('\n') }}">
-        <input type="hidden" name="results" value="{{ bullets.conclusion_bullets | join('\n') }}">
+        <label>Title</label>
+        <input type="text" name="title" value={{ bullets.title }} class="w-full border p-2">
+
+        <label>Introduction</label>
+        <textarea name="introduction" class="w-full h-32 border p-2">{{ bullets.introduction_bullets | join('\n') }}</textarea>
+
+        <label>Problem Gap</label>
+        <textarea name="problem" class="w-full h-32 border p-2">{{ bullets.problem_gap_bullets | join('\n') }}</textarea>
+
+        <label>Research Goal</label>
+        <textarea name="research_goals" class="w-full h-32 border p-2">{{ bullets.research_goal_bullets | join('\n') }}</textarea>
+
+        <label>Method</label>
+        <textarea name="methods" class="w-full h-32 border p-2">{{ bullets.method_bullets | join('\n') }}</textarea>
+
+        <label>Results</label>
+        <textarea name="results" class="w-full h-32 border p-2">{{ bullets.result_bullets | join('\n') }}</textarea>
+
+        <label>Conclusion</label>
+        <textarea name="conclusion" class="w-full h-32 border p-2">{{ bullets.conclusion_bullets | join('\n') }}</textarea>
+
 
         <button type="submit" class="w-full mt-6 bg-green-600 text-white font-bold py-3 rounded hover:bg-green-700 shadow-md">
             Export to .PPTX
