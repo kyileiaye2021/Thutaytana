@@ -67,8 +67,17 @@
     </div>
     {% endif %}
 
-    <button class="w-full mt-6 bg-green-600 text-white font-bold py-2 rounded hover:bg-green-700">
-        Export to .PPTX
-    </button>
+    <form action="/api/download-pptx" method="POST">
+        <input type="hidden" name="title" values="{{bullets.title}}">
+        <input type="hidden" name="results" value="{{ bullets.introduction | join('\n') }}">
+        <input type="hidden" name="results" value="{{ bullets.problem | join('\n') }}">
+        <input type="hidden" name="methods" values"{{bullets.methods | join('\n')}}">
+        <input type="hidden" name="results" value="{{ bullets.results | join('\n') }}">
+        <input type="hidden" name="results" value="{{ bullets.conclusion | join('\n') }}">
+
+        <button type="submit" class="w-full mt-6 bg-green-600 text-white font-bold py-3 rounded hover:bg-green-700 shadow-md">
+            Export to .PPTX
+        </button>
+    </form>
 
 </div>

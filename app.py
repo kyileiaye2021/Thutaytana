@@ -1,11 +1,14 @@
 from fastapi import FastAPI, File, UploadFile, Form, Request
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import FileResponse
+from pptx import Presentation
 from typing import  List, Optional, Annotated
 import base64
 import os
 from models import PosterBulletPoints
 from research_parser import research_context_parser, research_figure_parser
 from generate_poster import poster_formatter_agent, generate_poster
+from conference_parser import conference_parser
 
 # initialize the web server
 app = FastAPI()
@@ -81,4 +84,39 @@ async def generate_draft(
             }
     )
     
+# for exporting to pptx poster slide
+@app.post("/api/download-pptx")
+async def download_pptx(
+    title: str = Form(...),
+    introduction: str = Form(...),
+    problem: str = Form(...),
+    research_goals: str = Form(...),
+    methods: str = Form(...),
+    results: str = Form(...),
+    conclusion: str = Form(...)
+):
+    bullet_points = PosterBulletPoints(
+        title = title,
+        introduction_bullets= introduction.split("\n"),
+        problem_gap_bullets=problem.split("\n"),
+        research_goal_bullets=research_goals.split("\n"),
+        method_bullets=methods.split("\n"),
+        result_bullets=results.split("\n"),
+        conclusion_bullets=conclusion.split("\n"),
+    )
+    
+    # Default conference rules
+    conference_guidelines = "Dimensions: 48 inches wide by 36 inches height."
+    conference_rule_agent = conference_parser()
+    conference_rules = conference_rule_agent.invoke(conference_guidelines)
+
+    output_path = "./uploads/poster_output.pptx"
+    generate_poster(bullet_points, vision_metadata=None, conference_rules=conference_rules, output_name=output_path)
+
+    return FileResponse(
+        path=output_path,
+        filename="poster.pptx",
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    )
+
     
