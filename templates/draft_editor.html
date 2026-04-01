@@ -9,16 +9,25 @@
     <div>
         <label class="block text-xs font-bold text-gray-500 uppercase">Introduction</label>
         <ul class="list-disc pl-5 text-sm space-y-1">
-            {% for bullet in bullets.introduction %}
+            {% for bullet in bullets.introduction_bullets %}
                 <li>{{ bullet }}</li>
             {% endfor %}
         </ul>
     </div>
 
     <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase">Problem / Gap</label>
+        <label class="block text-xs font-bold text-gray-500 uppercase">Problem Gap</label>
         <ul class="list-disc pl-5 text-sm space-y-1">
-            {% for bullet in bullets.problem %}
+            {% for bullet in bullets.problem_gap_bullets %}
+                <li>{{ bullet }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase">Research Goal</label>
+        <ul class="list-disc pl-5 text-sm space-y-1">
+            {% for bullet in bullets.research_goal_bullets %}
                 <li>{{ bullet }}</li>
             {% endfor %}
         </ul>
@@ -27,7 +36,7 @@
     <div>
         <label class="block text-xs font-bold text-gray-500 uppercase">Methodology</label>
         <ul class="list-disc pl-5 text-sm space-y-1">
-            {% for bullet in bullets.methods %}
+            {% for bullet in bullets.method_bullets %}
                 <li>{{ bullet }}</li>
             {% endfor %}
         </ul>
@@ -36,7 +45,7 @@
     <div>
         <label class="block text-xs font-bold text-gray-500 uppercase">Results</label>
         <ul class="list-disc pl-5 text-sm space-y-1">
-            {% for bullet in bullets.results %}
+            {% for bullet in bullets.result_bullets %}
                 <li>{{ bullet }}</li>
             {% endfor %}
         </ul>
@@ -45,7 +54,7 @@
     <div>
         <label class="block text-xs font-bold text-gray-500 uppercase">Conclusion</label>
         <ul class="list-disc pl-5 text-sm space-y-1">
-            {% for bullet in bullets.conclusion %}
+            {% for bullet in bullets.conclusion_bullets %}
                 <li>{{ bullet }}</li>
             {% endfor %}
         </ul>
@@ -69,11 +78,12 @@
 
     <form action="/api/download-pptx" method="POST">
         <input type="hidden" name="title" values="{{bullets.title}}">
-        <input type="hidden" name="results" value="{{ bullets.introduction | join('\n') }}">
-        <input type="hidden" name="results" value="{{ bullets.problem | join('\n') }}">
-        <input type="hidden" name="methods" values"{{bullets.methods | join('\n')}}">
-        <input type="hidden" name="results" value="{{ bullets.results | join('\n') }}">
-        <input type="hidden" name="results" value="{{ bullets.conclusion | join('\n') }}">
+        <input type="hidden" name="results" value="{{ bullets.introduction_bullets | join('\n') }}">
+        <input type="hidden" name="results" value="{{ bullets.problem_gap_bullets | join('\n') }}">
+        <input type="hidden" name="results" value="{{ bullets.research_goal_bullets | join('\n') }}">
+        <input type="hidden" name="methods" values"{{bullets.method_bullets | join('\n')}}">
+        <input type="hidden" name="results" value="{{ bullets.result_bullets | join('\n') }}">
+        <input type="hidden" name="results" value="{{ bullets.conclusion_bullets | join('\n') }}">
 
         <button type="submit" class="w-full mt-6 bg-green-600 text-white font-bold py-3 rounded hover:bg-green-700 shadow-md">
             Export to .PPTX
