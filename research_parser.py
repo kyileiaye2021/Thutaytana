@@ -61,8 +61,8 @@ def research_context_parser():
     This agent will get research related context from the user and will structure and return it 
     """
     # wraps open ai api but gives agent capabilities
-    llm = ChatOpenAI(
-        model="gpt-4o-mini", 
+    llm = ChatGoogleGenerativeAI(
+        model="gemini-flash-latest", 
         temperature=0 # temperature 0 is crucial because we want factual extraction, not creative writing
     )
     
