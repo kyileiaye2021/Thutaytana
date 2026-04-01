@@ -1,5 +1,6 @@
-from fastapi import FastAPI, File, UploadFile, Form 
-from typing import  List, Optional
+from fastapi import FastAPI, File, UploadFile, Form, Request
+from fastapi.templating import Jinja2Templates
+from typing import  List, Optional, Annotated
 import base64
 import os
 from models import PosterBulletPoints
@@ -14,14 +15,20 @@ app = FastAPI()
 UPLOAD_DIR = "./uploads"
 os.makedirs(UPLOAD_DIR, exist_ok = True)
 
+templates = Jinja2Templates(directory="templates")
+@app.get("/")
+async def serve_home_page(request: Request):
+    return templates.TemplateResponse(request=request, name="index.html")
+
 # Define data to receive from the frontend
 # We have to use Form() since we are receiving multipart form data
 # we can use pydantic object if the input is pure text
 @app.post("/api/draft")
 async def generate_draft(
+    request: Request,
     raw_text: str = Form(...),
     user_focus: str = Form("poster"), 
-    images: Optional[List[UploadFile]] | None = File(None)
+    images: Annotated[list[UploadFile] | None, File()] = None,
 ):
     # process images if users attach them
     extracted_images = {}
@@ -64,9 +71,14 @@ async def generate_draft(
         'conclusion': parsed_context.conclusion
     })
     
-    return {
-        "draft_bullets": bullet_points.model_dump(), # converting bullet point object to dict
-        "vision_metadata": [v.model_dump() for v in vision_metadata] if vision_metadata else None
-    }
+    # return html template, passing AI generated bullet points into it
+    return templates.TemplateResponse(
+            request=request,
+            name="draft_editor.html",
+            context={
+                "bullets": bullet_points.model_dump(), # converting bullet point object to dict
+                "vision_metadata": [v.model_dump() for v in vision_metadata] if vision_metadata else None
+            }
+    )
     
     

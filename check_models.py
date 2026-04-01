@@ -1,3 +1,4 @@
+# this is just for checking available gemini vision model to be used in image parsing agent
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
