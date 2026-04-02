@@ -78,7 +78,7 @@
 
     <form action="/api/download-pptx" method="POST">
         <label>Title</label>
-        <textarea name="title" class="w-full h-32 border p-2">{{ bullets.title | join('\n') }}</textarea>
+        <textarea name="title" class="w-full h-32 border p-2">{{ bullets.title}}</textarea>
     
         <label>Introduction</label>
         <textarea name="introduction" class="w-full h-32 border p-2">{{ bullets.introduction_bullets | join('\n') }}</textarea>
