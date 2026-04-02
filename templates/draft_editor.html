@@ -68,8 +68,8 @@
             {% for figure in vision_metadata %}
             <div class="p-4 bg-indigo-50 border border-indigo-100 rounded-lg shadow-sm">
                 <p class="font-bold text-indigo-900 text-sm mb-1">Figure Analysis</p>
-                <p class="text-sm text-gray-800"><strong>Caption:</strong> {{ figure.caption }}</p>
-                <p class="text-xs text-gray-600 mt-2"><strong>AI Summary:</strong> {{ figure.summary }}</p>
+                <p class="text-sm text-gray-800"><strong>Caption:</strong> {{ figure.figure_caption }}</p>
+                <p class="text-xs text-gray-600 mt-2"><strong>AI Summary:</strong> {{ figure.detailed_analysis }}</p>
             </div>
             {% endfor %}
         </div>
@@ -78,8 +78,8 @@
 
     <form action="/api/download-pptx" method="POST">
         <label>Title</label>
-        <input type="text" name="title" value={{ bullets.title }} class="w-full border p-2">
-
+        <textarea name="title" class="w-full h-32 border p-2">{{ bullets.title | join('\n') }}</textarea>
+    
         <label>Introduction</label>
         <textarea name="introduction" class="w-full h-32 border p-2">{{ bullets.introduction_bullets | join('\n') }}</textarea>
 
