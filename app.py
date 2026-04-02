@@ -13,11 +13,6 @@ from conference_parser import conference_parser
 # initialize the web server
 app = FastAPI()
 
-# temporarily create folder for on-the-fly image processing
-# will implement database later
-UPLOAD_DIR = "./uploads"
-os.makedirs(UPLOAD_DIR, exist_ok = True)
-
 templates = Jinja2Templates(directory="templates")
 @app.get("/")
 async def serve_home_page(request: Request):
@@ -37,6 +32,13 @@ async def generate_draft(
     extracted_images = {}
     vision_metadata = None
     if images:
+        # temporarily create folder for on-the-fly image processing
+        # will implement database later
+        # get the absolute path of the directory where app.py exists
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__)) # Users/kyileiaye/Desktop/Thutaytana
+        UPLOAD_DIR = os.path.join(BASE_DIR, "uploads") # join it with the folder name ; Users/kyileiaye/Desktop/Thutaytana/uploads
+        os.makedirs(UPLOAD_DIR, exist_ok = True) # create the directory
+
         for img in images:
             file_path = os.path.join(UPLOAD_DIR, img.filename)
             content = await img.read()
