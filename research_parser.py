@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, SystemMessage
 from models import ResearchContext, FigureMetadata
 
@@ -14,9 +15,10 @@ def research_figure_parser(raw_text, image_blobs):
     """
     
     # defining vlm 
-    vlm = ChatGoogleGenerativeAI(
-        model="gemini-flash-latest",
-        temperature = 0
+    vlm = ChatGroq(
+        model="meta-llama/llama-4-scout-17b-16e-instruct",
+        temperature=0
+        # max_retries=2 # good practice to handle momentary network blips
     )
     
     # binding with structured output
@@ -35,7 +37,7 @@ def research_figure_parser(raw_text, image_blobs):
     - Write a deep `detailed_analysis` that will be used by another AI to write the abstract.
     - If a figure caption is given, use it to ground your interpretation. If not, try to understand the figure based on the research context and generate metadata.
     - Write a short, punchy `poster_caption` suitable for a PowerPoint slide.
-    - Categorize the figure into the most logical `suggested_section` (Introduction, Problem Gap, Methodology, Results/Findings, Conclusion, or Exclude)."""
+    - Categorize the figure into the most logical `suggested_section` (Introduction, Problem Gap, Method, Results, Conclusion, or Exclude)."""
     
     # constructing multimodal list 
     # info provided by users
@@ -44,7 +46,7 @@ def research_figure_parser(raw_text, image_blobs):
     ]
     for filename, img in image_blobs.items():
         user_content.append({"type": "text", "text": f"\n--- Start of Image: {filename} ---"})
-        user_content.append({"type": "image_url", "image_url":img})
+        user_content.append({"type": "image_url", "image_url":{"url": img}}) # need to change img to dict if we use groq
         
     # multimodal prompting
     prompt = structured_vlm.invoke(
@@ -61,11 +63,11 @@ def research_context_parser():
     This agent will get research related context from the user and will structure and return it 
     """
     # wraps open ai api but gives agent capabilities
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-flash-latest", 
-        temperature=0 # temperature 0 is crucial because we want factual extraction, not creative writing
+    llm = ChatGroq(
+        model="llama-3.3-70b-versatile",
+        temperature=0,
+        max_retries=2 # good practice to handle momentary network blips   )
     )
-    
     # make llm to return the research context in the schema/structure we defined in the ResearchContext in models.py
     structured_llm = llm.with_structured_output(ResearchContext)
     

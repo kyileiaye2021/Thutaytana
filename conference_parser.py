@@ -1,15 +1,16 @@
 import os
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from models import ConferenceRules
 
 load_dotenv() # load open ai api from .env
 
 def conference_parser():
-    llm = ChatOpenAI(
-        model="gpt-4o-mini",
-        temperature=0 
+    llm = ChatGroq(
+        model="llama-3.3-70b-versatile",
+        temperature=0,
+        max_retries=2 # good practice to handle momentary network blips
     )
     
     structured_llm = llm.with_structured_output(ConferenceRules)

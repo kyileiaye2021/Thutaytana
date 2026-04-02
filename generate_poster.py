@@ -6,7 +6,7 @@ from pptx.enum.text import PP_ALIGN
 from research_parser import research_context_parser, research_figure_parser
 from conference_parser import conference_parser
 from models import PosterBulletPoints
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 
 # poster formatter agent
@@ -15,9 +15,10 @@ def poster_formatter_agent():
     Agent that generates bullet points for each section for poster
     """
     
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-flash-latest",
-        temperature= 0
+    llm = ChatGroq(
+        model="llama-3.3-70b-versatile",
+        temperature=0,
+        max_retries=2 # good practice to handle momentary network blips
     )
     structured_llm = llm.with_structured_output(PosterBulletPoints)
     
