@@ -38,7 +38,7 @@ class FigureDetails(BaseModel):
     suggested_section: Literal["Introduction", "Problem Gap", "Research Goal", "Method", "Result", "Conclusion", "Exclude"] = Field(
         description="Categorize where this image belongs on a scientific poster. Use 'Exclude' if it is just a decorative logo.")
     
-    figure_caption: List[str] = Field(description="A very short, 1-sentence punchy caption to display directly under the image on the poster.")
+    figure_caption: str = Field(description="A very short, 1-sentence punchy caption to display directly under the image on the poster.")
     
 class FigureMetadata(BaseModel):
     """
@@ -55,7 +55,7 @@ class FontConstraints(BaseModel):
     family: str = Field(description="Font family like Arial. Return 'None' if missing.", default="None")
     
 class WordLimits(BaseModel):
-    total: int = Field(description="Max total words for abstract. Return 200 if missing.", default = 200)
+    total: Optional[int] = Field(description="Max total words for abstract. Return 200 if missing.", default = 200)
     
 class ConferenceRules(BaseModel):
     """
@@ -69,7 +69,7 @@ class ConferenceRules(BaseModel):
     height_inches: float = Field(description="The mandatory height of the poster in inches. Return 36.0 if not specified.", default=36.0)
     font_constraints: FontConstraints = Field(description="Font Rules.")
     required_sections: List[str] = Field(description="List of mandatory sections explicitly requested (e.g., ['Abstract', 'Ethics Statement', 'References']).")
-    word_limits: WordLimits = Field(description="Word Limits")
+    word_limits: Optional[WordLimits] = Field(description="Word Limits")
     branding_rules: Optional[str] = Field(description="Any specific rules about logos, color palettes, or institutional branding.")
     
 
