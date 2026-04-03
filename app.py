@@ -83,7 +83,8 @@ async def generate_draft(
             name="draft_editor.html",
             context={
                 "bullets": bullet_points.model_dump(), # converting bullet point object to dict
-                "vision_metadata": [v.model_dump() for v in vision_metadata] if vision_metadata else None
+                "vision_metadata": [v.model_dump() for v in vision_metadata] if vision_metadata else None,
+                "abstract": parsed_context.abstract
             }
     )
     
