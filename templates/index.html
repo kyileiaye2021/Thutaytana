@@ -15,9 +15,17 @@
     </style>
 </head>
 <body class = "bg-gray-50 p-8 font-sans text-gray-800">
-    <div class = "max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div class = "max-w-5xl mx-auto grid grid-cols-1 flex-col gap-8">
         <div class="bg-white p-6 rounded-lg shadow-md h-fit">
-            <h1 class="text-2xl font-bold mb-6 text-blue-600">🔬 AI Poster Generator</h1>
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-extrabold text-black-600 mb-4 tracking-tight">
+                    🔬 Thutaytana
+                </h1>
+                
+                <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                    An intelligent research assistant that automatically parses academic text, analyzes complex figures, and generates professional conference posters and abstract in real-time.
+                </p>
+            </div>
 
             <form hx-post="/api/draft"
                 hx-encoding="multipart/form-data" 
