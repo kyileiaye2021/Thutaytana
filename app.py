@@ -9,6 +9,7 @@ from models import PosterBulletPoints
 from research_parser import research_context_parser, research_figure_parser
 from generate_poster import poster_formatter_agent, generate_poster
 from conference_parser import conference_parser
+import json
 
 # initialize the web server
 app = FastAPI()
@@ -95,7 +96,8 @@ async def download_pptx(
     research_goals: str = Form(...),
     methods: str = Form(...),
     results: str = Form(...),
-    conclusion: str = Form(...)
+    conclusion: str = Form(...),
+    vision_data: str = Form(None) 
 ):
     bullet_points = PosterBulletPoints(
         title = title,
@@ -107,13 +109,28 @@ async def download_pptx(
         conclusion_bullets=conclusion.split("\n"),
     )
     
+    parsed_vision = None
+    if vision_data and vision_data != None:
+        vision_list = json.loads(vision_data)
+        
+    # Helper class to allow dot-notation (e.g., img.image_filename)
+    # The vision agent returns pydantic vision_metadata obj and access its data using dot notation
+    # but json.load(vision_data) doesn't recreate pydantic obj but it creates dict. we have to call img['image_filename] 
+    # but generate poster calls vision metadata with dot annotation. So, if we create a class, we can call the dot 
+    class ImageMetaData:
+        def __init__(self, d):
+            for k, v in d.items():
+                setattr(self, k , v)
+                
+    parsed_vision = [ImageMetaData(img) for img in vision_list]
+    
     # Default conference rules
     conference_guidelines = "Dimensions: 48 inches wide by 36 inches height."
     conference_rule_agent = conference_parser()
     conference_rules = conference_rule_agent.invoke(conference_guidelines)
 
     output_path = "./uploads/poster_output.pptx"
-    generate_poster(bullet_points, vision_metadata=None, conference_rules=conference_rules, output_name=output_path)
+    generate_poster(bullet_points, vision_metadata=parsed_vision, conference_rules=conference_rules, output_name=output_path)
 
     return FileResponse(
         path=output_path,

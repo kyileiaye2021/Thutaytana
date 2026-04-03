@@ -77,6 +77,8 @@
     {% endif %}
 
     <form action="/api/download-pptx" method="POST">
+        <input type="hidden" name="vision_data" value="{{ vision_metadata | tojson | forceescape }}">
+
         <label>Title</label>
         <textarea name="title" class="w-full h-32 border p-2">{{ bullets.title}}</textarea>
     
