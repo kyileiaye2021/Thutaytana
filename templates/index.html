@@ -26,12 +26,13 @@
                     An intelligent research assistant that automatically parses academic text, analyzes complex figures, and generates professional conference posters and abstract in real-time.
                 </p>
             </div>
-
-            <form hx-post="/api/draft"
+            
+            <!--firing htmx input submission-->
+            <!--<form hx-post="/api/draft"
                 hx-encoding="multipart/form-data" 
                 hx-target="#ai-response-container"
-                hx-indicator="#loading-spinner">
-
+                hx-indicator="#loading-spinner">-->
+            <form>
                 {# for text #}
                 <div class="mb-4">
                     <label class="block text-sm font-semibold mb-2">1. Paste Research Text</label>
@@ -56,7 +57,7 @@
         <div class="bg-white p-6 rounded-lg shadow-md min-h-[500px]">
             <h2 class="text-xl font-bold mb-4 border-b pb-2">Poster Draft</h2>
             
-            <div id="loading-spinner" class="htmx-indicator text-center py-10">
+            <div id="loading-spinner" class="text-center py-10" style="display:none;>
                 <p class="text-blue-500 font-bold animate-pulse">🤖 AI is analyzing research and routing images...</p>
             </div>
 
@@ -83,6 +84,7 @@
             });
             //reset picker so the same file can be re-added lager if needed
             picker.value = '';
+            console.log("Files after pick: ", selectedFiles.length)
             renderPreview();
         });
 
@@ -113,11 +115,37 @@
             });
         }
 
-        //Before HTMX submits, inject accumulated files into the Formdata
-        document.querySelector('form').addEventListener('htmx:configRequest', (e) => {
+        // manual form submission instead of relying oon HTMX (HTMX doesn't send the image files to server)
+        document.querySelector('form').addEventListener('submit', async(e) => {
+            e.preventDefault(); // stop normal + HTMX submission
+
+            const form = e.target;
+            const formData = new FormData(form)
+
+            console.log('submit fired, selectedFiles: ', selectedFiles.length)
+
+            // inject our accumulated files
             selectedFiles.forEach(file => {
-                e.detail.parameters.append('images', file);
+                formData.append('images', file);
             });
+            
+            // show the loading spinner manually since we bypassed HTMX
+            document.getElementById('loading-spinner').style.display = 'block';
+            document.getElementById('ai-response-container').innerHTML = '';
+
+            try{
+                const response = await fetch('/api/draft', {
+                    method: "POST",
+                    body: formData // browser sets multipart headers automatically
+                });
+
+                const html = await response.text();
+                document.getElementById('ai-response-container').innerHTML = html;
+            } catch (err) {
+                document.getElementById('ai-response-container').innerHTML = '<p>Something went wrong. Please try again.</p>'
+            } finally {
+                document.getElementById('loading-spinner').style.display = 'none';
+            }
         });
     </script>
 </body>
