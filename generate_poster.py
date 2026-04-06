@@ -156,19 +156,18 @@ def generate_poster(poster_content, vision_metadata, conference_rules, output_na
         # estimated_height = Inches(1.5) + (total_chars / 50 * Inches(0.3)) + (len(bullets) * Inches(0.1))
         
         # added estimated image height if this section has an image
-        image_to_draw = None
+        images_to_draw = []
         if vision_metadata:
             for img in vision_metadata:
                 if base_word in img.suggested_section.lower():
                     # estimate image height based on the dynamic column width
-                    image_to_draw = img
-                    break
+                    images_to_draw.append(img)
         
         # for text
         estimated_text_height = Inches(1.5) + (sum(len(b) for b in bullets) / 50 * Inches(0.55))
         
         # for image
-        estimated_img_height = (col_width * 0.75) if image_to_draw else 0
+        estimated_img_height = (col_width * 0.75) * len(images_to_draw)
         
         total_estimated_height = estimated_text_height + estimated_img_height
         
@@ -182,7 +181,7 @@ def generate_poster(poster_content, vision_metadata, conference_rules, output_na
         current_y = add_section(slide, section_title, bullets, current_x, current_y, col_width)
 
         # draw the images
-        if image_to_draw:
+        for image_to_draw in images_to_draw:
             try:
                 picture = slide.shapes.add_picture(
                     image_to_draw.image_filename,
