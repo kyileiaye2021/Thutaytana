@@ -30,6 +30,9 @@ async def generate_draft(
     images: Annotated[list[UploadFile] | None, File()] = None,
 ):
     # process images if users attach them
+    print("=== /api/draft called ===")
+    print(f"DEBUG: images received: {images}")          # is it None or a list?
+    print(f"DEBUG: number of images: {len(images) if images else 0}")
     extracted_images = {}
     vision_metadata = None
     if images:
@@ -100,6 +103,7 @@ async def download_pptx(
     conclusion: str = Form(...),
     vision_data: str = Form(None) 
 ):
+    print("DEBUG vision_data:", vision_data) 
     bullet_points = PosterBulletPoints(
         title = title,
         introduction_bullets= introduction.split("\n"),
@@ -111,19 +115,22 @@ async def download_pptx(
     )
     
     parsed_vision = None
-    if vision_data and vision_data != None:
+    if vision_data:
+
         vision_list = json.loads(vision_data)
         
-    # Helper class to allow dot-notation (e.g., img.image_filename)
-    # The vision agent returns pydantic vision_metadata obj and access its data using dot notation
-    # but json.load(vision_data) doesn't recreate pydantic obj but it creates dict. we have to call img['image_filename] 
-    # but generate poster calls vision metadata with dot annotation. So, if we create a class, we can call the dot 
-    class ImageMetaData:
-        def __init__(self, d):
-            for k, v in d.items():
-                setattr(self, k , v)
-                
-    parsed_vision = [ImageMetaData(img) for img in vision_list]
+        if vision_list is not None:
+        
+        # Helper class to allow dot-notation (e.g., img.image_filename)
+        # The vision agent returns pydantic vision_metadata obj and access its data using dot notation
+        # but json.load(vision_data) doesn't recreate pydantic obj but it creates dict. we have to call img['image_filename] 
+        # but generate poster calls vision metadata with dot annotation. So, if we create a class, we can call the dot 
+            class ImageMetaData:
+                def __init__(self, d):
+                    for k, v in d.items():
+                        setattr(self, k , v)
+                        
+            parsed_vision = [ImageMetaData(img) for img in vision_list]
     
     # Default conference rules
     conference_guidelines = "Dimensions: 48 inches wide by 36 inches height."
