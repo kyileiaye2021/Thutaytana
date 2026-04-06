@@ -33,19 +33,38 @@
                 hx-target="#ai-response-container"
                 hx-indicator="#loading-spinner">-->
             <form>
-                {# for text #}
                 <div class="mb-4">
-                    <label class="block text-sm font-semibold mb-2">1. Paste Research Text</label>
-                    <textarea name="raw_text" required rows="8" class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Paste your methodology, results, abstract..."></textarea>
-                </div>
+                    <div 
+                        id="drop-zone"
+                        class="w-full border rounded-lg focus-within:ring-2 focus-within:ring-blue-400 transition-colors duration-200"
+                    >
 
-                {# for Figures #}
-                <div class="mb-4">
-                    <label class="block text-sm font-semibold mb-2">2. Upload Figures (Optional)</label>
-                    <input type="file" id="image-picker" accept="image/*" class="w-full p-2 border rounded">
-                    <div id="image-preview-list" class="flex flex-wrap gap-2 mt-3"></div> <!--Thumbnail preview list-->
-                </div>
+                    <textarea 
+                        name="raw_text" 
+                        id="research-text"
+                        required 
+                        rows="8" 
+                        class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-400 outline-none" 
+                        placeholder="Paste your methodology, results, abstract..."></textarea>
 
+                    <!-- divider line + image previews -->
+                    <div id="image-preview-list" class="flex flex-wrap gap-2 px-3 pt-2 empty:hidden"></div>
+
+                    <!--Bottom toolbar-->
+                    <div class="flex items-center justify-between px-3 py-2 border-t bg-gray-50 rounded-b-lg">
+                        <label for="image-picker" class="cursor-pointer text-gray-400 hover:text-blue-500 transition-colors" title="Upload figures">
+                            <!-- paperclip icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                            </svg>
+                        </label>
+                        <span id="file-count" class="text-xs text-gray-400"></span>
+                         <input type="file" id="image-picker" accept="image/*" class="hidden">
+                    </div>
+                </div>
+            </div>
+
+            
                 <input type="hidden" name="user_focus" value="poster">
 
                 <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded hover:bg-blue-700 transition duration-200">
@@ -57,7 +76,7 @@
         <div class="bg-white p-6 rounded-lg shadow-md min-h-[500px]">
             <h2 class="text-xl font-bold mb-4 border-b pb-2">Poster Draft</h2>
             
-            <div id="loading-spinner" class="text-center py-10" style="display:none;>
+            <div id="loading-spinner" class="text-center py-10" style="display:none;">
                 <p class="text-blue-500 font-bold animate-pulse">🤖 AI is analyzing research and routing images...</p>
             </div>
 
@@ -73,26 +92,47 @@
 
         const picker = document.getElementById('image-picker');
         const previewList = document.getElementById('image-preview-list');
+        const dropZone = document.getElementById('drop-zone');
+        const fileCount = document.getElementById('file-count');
 
         picker.addEventListener('change', () => {
-            //append newly picked files, skipping duplicates by file name + size
-            Array.from(picker.files).forEach(newFile => {
+            addFiles(Array.from(picker.files));
+            picker.value = '';
+        });
+
+        // drag over - highlight the box
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('ring-2', 'ring-blue-400');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('ring-2', 'ring-blue-400');
+        })
+
+        //drop images into the box
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('ring-2', 'ring-blue-400');
+            const imageFiles = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            addFiles(imageFiles);
+        });
+        
+        //shared logic for adding files from any source
+        function addFiles(newFiles){
+            newFiles.forEach(newFile => {
                 const isDupe = selectedFiles.some(
                     f => f.name === newFile.name && f.size === newFile.size
                 );
                 if (!isDupe) selectedFiles.push(newFile);
             });
-            //reset picker so the same file can be re-added lager if needed
-            picker.value = '';
-            console.log("Files after pick: ", selectedFiles.length)
             renderPreview();
-        });
+        }
 
         function renderPreview(){
             previewList.innerHTML = '';
             selectedFiles.forEach((file, index) => {
                 const url = URL.createObjectURL(file);
-                
                 // creating thumbnail image and x button
                 const wrapper = document.createElement('div');
                 wrapper.className = 'relative w-24 h-24';
