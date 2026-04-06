@@ -9,66 +9,6 @@
         >{{ abstract }}</textarea>
     </div>
 
-    <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase">Title</label>
-        <div class="p-3 bg-blue-50 border border-blue-100 rounded text-lg font-bold">
-            {{ bullets.title }}
-        </div>
-    </div>
-
-    <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase">Introduction</label>
-        <ul class="list-disc pl-5 text-sm space-y-1">
-            {% for bullet in bullets.introduction_bullets %}
-                <li>{{ bullet }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase">Problem Gap</label>
-        <ul class="list-disc pl-5 text-sm space-y-1">
-            {% for bullet in bullets.problem_gap_bullets %}
-                <li>{{ bullet }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase">Research Goal</label>
-        <ul class="list-disc pl-5 text-sm space-y-1">
-            {% for bullet in bullets.research_goal_bullets %}
-                <li>{{ bullet }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase">Methodology</label>
-        <ul class="list-disc pl-5 text-sm space-y-1">
-            {% for bullet in bullets.method_bullets %}
-                <li>{{ bullet }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase">Results</label>
-        <ul class="list-disc pl-5 text-sm space-y-1">
-            {% for bullet in bullets.result_bullets %}
-                <li>{{ bullet }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase">Conclusion</label>
-        <ul class="list-disc pl-5 text-sm space-y-1">
-            {% for bullet in bullets.conclusion_bullets %}
-                <li>{{ bullet }}</li>
-            {% endfor %}
-        </ul>
-    </div>
 
     {% if vision_metadata %}
     <div class= "mt-8 border-t-2 pt-6">

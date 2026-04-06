@@ -41,7 +41,8 @@
                 {# for Figures #}
                 <div class="mb-4">
                     <label class="block text-sm font-semibold mb-2">2. Upload Figures (Optional)</label>
-                    <input type="file" name="images" multiple accept="image/*" class="w-full p-2 border rounded">
+                    <input type="file" id="image-picker" accept="image/*" class="w-full p-2 border rounded">
+                    <div id="image-preview-list" class="flex flex-wrap gap-2 mt-3"></div> <!--Thumbnail preview list-->
                 </div>
 
                 <input type="hidden" name="user_focus" value="poster">
@@ -64,5 +65,60 @@
             </div>
         </div>
     </div>
+
+    <script>
+        //Master list of File objs across multiple picks
+        let selectedFiles = [];
+
+        const picker = document.getElementById('image-picker');
+        const previewList = document.getElementById('image-preview-list');
+
+        picker.addEventListener('change', () => {
+            //append newly picked files, skipping duplicates by file name + size
+            Array.from(picker.files).forEach(newFile => {
+                const isDupe = selectedFiles.some(
+                    f => f.name === newFile.name && f.size === newFile.size
+                );
+                if (!isDupe) selectedFiles.push(newFile);
+            });
+            //reset picker so the same file can be re-added lager if needed
+            picker.value = '';
+            renderPreview();
+        });
+
+        function renderPreview(){
+            previewList.innerHTML = '';
+            selectedFiles.forEach((file, index) => {
+                const url = URL.createObjectURL(file);
+                
+                // creating thumbnail image and x button
+                const wrapper = document.createElement('div');
+                wrapper.className = 'relative w-24 h-24';
+                wrapper.innerHTML = `
+                        <img src="${url}" class="w-24 h-24 object-cover rounded border" title="${file.name}">
+                        <button 
+                            type="button"
+                            data-index="${index}"
+                            class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center leading-none"
+                        >✕</button>
+                    `;
+
+                    //remove button
+                    wrapper.querySelector('button').addEventListener('click', (e) => {
+                        selectedFiles.splice(Number(e.target.dataset.index), 1);
+                        renderPreview();
+                    });
+
+                    previewList.appendChild(wrapper);
+            });
+        }
+
+        //Before HTMX submits, inject accumulated files into the Formdata
+        document.querySelector('form').addEventListener('htmx:configRequest', (e) => {
+            selectedFiles.forEach(file => {
+                e.detail.parameters.append('images', file);
+            });
+        });
+    </script>
 </body>
 </html>
