@@ -105,13 +105,13 @@ async def download_pptx(
 ):
     print("DEBUG vision_data:", vision_data) 
     bullet_points = PosterBulletPoints(
-        title = title,
-        introduction_bullets= introduction.split("\n"),
-        problem_gap_bullets=problem.split("\n"),
-        research_goal_bullets=research_goals.split("\n"),
-        method_bullets=methods.split("\n"),
-        result_bullets=results.split("\n"),
-        conclusion_bullets=conclusion.split("\n"),
+        title = title.strip(),
+        introduction_bullets= [b for b in introduction.splitlines()],
+        problem_gap_bullets=[b for b in problem.splitlines()],
+        research_goal_bullets= [b for b in research_goals.splitlines()],
+        method_bullets= [b for b in methods.splitlines()],
+        result_bullets=[b for b in results.splitlines()],
+        conclusion_bullets=[b for b in conclusion.splitlines()],
     )
     
     parsed_vision = None
