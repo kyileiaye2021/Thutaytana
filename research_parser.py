@@ -113,10 +113,14 @@ def research_context_parser():
     3. Extract concrete metrics for the results wherever possible.
     4. You MUST integrate quantitative insights from the provided 'Figure Descriptions' into your summary, especially in the Results section if vision_metada is not None.
     5. Ensure logical coherence across sections; each section should naturally build on the previous one.
+    6. NEVER start the abstract with "This study...", "This research...", "This paper...", or any similar phrasing.
+       Instead, open with the broader problem or context.
+    7. NEVER use '—' in any of the session like 'MediSync — A Fine-tuned LLM for Clinical Named Entity Recognition'.
     
-    When writing the research abstract, you must mimic the writing style, sentence structure, and tone provided in the 
-    <style_guide> for each specific section. You may combine the Results and Conclusion sections if appropriate, but preserve clarity of contributions and impact.
-    
+    CRITICAL: The <style_guide> below contains ONLY writing style and tone examples to guide formatting.
+    You MUST NOT copy, paraphrase, or draw any content, topics, or concepts from the examples.
+    Every sentence you generate must be derived exclusively from the provided raw research text and figure descriptions.
+    Violating this rule is a critical failure. Make sure to follow every section of style_guide (Introduction, Problem Gap, Research Goal, Methodology, Results/Findings, Conclusion). You may use first person perspective like 'we developed/used...'.
     <style_guide>
         <section name="Introduction">
             <description>1-2 sentences establishing the research area and the primary challenge.</description>
