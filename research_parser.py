@@ -116,6 +116,14 @@ def research_context_parser():
     6. NEVER start the abstract with "This study...", "This research...", "This paper...", or any similar phrasing.
        Instead, open with the broader problem or context.
     7. NEVER use '—' in any of the session like 'MediSync — A Fine-tuned LLM for Clinical Named Entity Recognition'.
+    8. When generating bullet points for each section, each bullet must:
+       - Be 2-3 sentences, not just a short label or phrase
+       - Explain the 'why' or 'so what' behind the point, not just state the fact 
+       - Be grounded in specific details from the raw research text
+       - For Problem Gap specifically: explain WHY the current limitation is a problem and what consequence it has.
+       - For Introduction: establish the broader real-world importance of the research area
+       - For Method: describe not just what was done but why that approach is chosen
+       - For Conclusion: connect the result back to the broader impact, not just restate the result
     
     CRITICAL: The <style_guide> below contains ONLY writing style and tone examples to guide formatting.
     You MUST NOT copy, paraphrase, or draw any content, topics, or concepts from the examples.
