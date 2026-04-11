@@ -6,8 +6,32 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, SystemMessage
 from models import ResearchContext, FigureMetadata
+from PIL import Image
+import io
+import base64
 
 load_dotenv() # load open ai api from .env
+def optimize_image_for_api(image_bytes:bytes, max_size=(1024, 1024), quality=85):
+    """
+    Compress image for API to process large image 
+
+    Args:
+        image_bytes (bytes): image raw bytes
+        max_size (tuple, optional): _description_. Defaults to (1024, 1024).
+        quality (int, optional): image quality. Defaults to 85.
+
+    Returns:
+        _type_: encoded image bytes
+    """
+    img = Image.open(io.BytesIO(image_bytes))
+    #converting to RGB if the image is transparent
+    if img.mode == 'RGBA':
+        img = img.convert('RGB')
+    img.thumbnail(max_size, Image.Resampling.LANCZOS) # resize maintaing aspect ratio
+    # Save to buffer as JPEG
+    buffer = io.BytesIO()
+    img.save(buffer, format='JPEG', quality=quality)
+    return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
 def research_figure_parser(raw_text, image_blobs):
     """
@@ -44,9 +68,11 @@ def research_figure_parser(raw_text, image_blobs):
     user_content = [
         {"type": "text", "text": f"Raw Research Context: {raw_text}\n\nAnalyze these images based on the text above:"}
     ]
-    for filename, img in image_blobs.items():
+    for filename, img_bytes in image_blobs.items():
+        compressed_b64 = optimize_image_for_api(img_bytes)
+        compressed_uri = f"data:image/jpeg;base64,{compressed_b64}"
         user_content.append({"type": "text", "text": f"\n--- Start of Image: {filename} ---"})
-        user_content.append({"type": "image_url", "image_url":{"url": img}}) # need to change img to dict if we use groq
+        user_content.append({"type": "image_url", "image_url":{"url": compressed_uri}}) # need to change img to dict if we use groq
         
     # multimodal prompting
     prompt = structured_vlm.invoke(

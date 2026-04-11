@@ -50,12 +50,13 @@ async def generate_draft(
                 f.write(content)
                 
             # convert to base 64 for AI vision agent
-            encoded_str = base64.b64encode(content).decode("utf-8")
-            mimie_type = img.content_type or "image/png"
-            formatted_uri = f"data:{mimie_type};base64,{encoded_str}"
+            # encoded_str = base64.b64encode(content).decode("utf-8")
+            # mimie_type = img.content_type or "image/png"
+            # formatted_uri = f"data:{mimie_type};base64,{encoded_str}"
+            
             
             # map file path to the base64 string
-            extracted_images[file_path] = formatted_uri
+            extracted_images[file_path] = content
             
         # run Vision Agent
         vision_metadata = research_figure_parser(raw_text, extracted_images)

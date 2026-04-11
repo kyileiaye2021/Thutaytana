@@ -35,7 +35,7 @@ class FigureDetails(BaseModel):
     extracted_metrics: List[str] = Field(description="Specific numbers, percentages, or p-values.")
     
     # For the poster agent 
-    suggested_section: Literal["Introduction", "Problem Gap", "Research Goal", "Method", "Result", "Conclusion", "Exclude"] = Field(
+    suggested_section: Literal["Introduction", "Problem Gap", "Research Goal", "Method", "Results", "Conclusion", "Exclude"] = Field(
         description="Categorize where this image belongs on a scientific poster. Use 'Exclude' if it is just a decorative logo.")
     
     figure_caption: str = Field(description="A very short, 1-sentence punchy caption to display directly under the image on the poster.")
