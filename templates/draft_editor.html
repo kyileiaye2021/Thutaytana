@@ -39,7 +39,7 @@
     <form action="/api/download-pptx" method="POST">
         <input type="hidden" name="vision_data" value="{{ vision_metadata | tojson | forceescape }}">
 
-        <input type="hidden" name="conference_rules" value="{{ conference_rules_json | forceescape }}">
+        <input type="hidden" name="conference_rules_json" value="{{ conference_rules_json | forceescape }}">
         <label>Title</label>
         <textarea name="title" class="w-full h-32 border p-2">{{ bullets.title}}</textarea>
     

@@ -122,7 +122,7 @@ async def download_pptx(
     results: str = Form(...),
     conclusion: str = Form(...),
     vision_data: str = Form(None),
-    conference_rules: str= Form("Dimensions: 48 inches wide by 36 inches height.")
+    conference_rules_json: str= Form(...)
 ):
     print("DEBUG vision_data:", vision_data) 
     # parse bullet point data
@@ -158,10 +158,13 @@ async def download_pptx(
                         
             parsed_vision = [ImageMetaData(img) for img in vision_list]
     
-    # Default conference rules
-    # conference_guidelines = "Dimensions: 48 inches wide by 36 inches height."
-    conference_rule_agent = conference_parser()
-    generated_conference_rules = conference_rule_agent.invoke(conference_rules)
+    # loading conference rules from UI
+    rules_dict = json.loads(conference_rules_json)
+    class ParsedRules:
+        def __init__(self):
+            for k, v in d.items():
+                setattr(self, k, v)
+    generated_conference_rules = ParsedRules(rules_dict)
     
     output_path = "./uploads/poster_output.pptx"
     generate_poster(bullet_points, vision_metadata=parsed_vision, conference_rules=generated_conference_rules, output_name=output_path)
