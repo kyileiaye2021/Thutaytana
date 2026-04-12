@@ -106,7 +106,7 @@ async def generate_draft(
                 "bullets": bullet_points.model_dump(), # converting bullet point object to dict
                 "vision_metadata": [v.model_dump() for v in vision_metadata] if vision_metadata else None,
                 "abstract": parsed_context.abstract, 
-                "conference_rules": parsed_rules_json,# <-- Pass it to the next page
+                "conference_rules_json": parsed_rules_json,# <-- Pass it to the next page
                 "size_warning": size_warning
             }
     )
@@ -161,7 +161,7 @@ async def download_pptx(
     # loading conference rules from UI
     rules_dict = json.loads(conference_rules_json)
     class ParsedRules:
-        def __init__(self):
+        def __init__(self, d):
             for k, v in d.items():
                 setattr(self, k, v)
     generated_conference_rules = ParsedRules(rules_dict)
