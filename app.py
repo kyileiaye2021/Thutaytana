@@ -11,6 +11,14 @@ from generate_poster import poster_formatter_agent, generate_poster
 from conference_parser import conference_parser
 import json
 
+# temporarily create folder for on-the-fly image processing
+ # will implement database later
+# get the absolute path of the directory where app.py exists
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)) # Users/kyileiaye/Desktop/Thutaytana
+UPLOAD_DIR = os.path.join(BASE_DIR, "uploads") # join it with the folder name ; Users/kyileiaye/Desktop/Thutaytana/uploads
+os.makedirs(UPLOAD_DIR, exist_ok = True) # create the directory
+
+
 # initialize the web server
 app = FastAPI()
 
@@ -26,6 +34,7 @@ async def serve_home_page(request: Request):
 async def generate_draft(
     request: Request,
     raw_text: str = Form(...),
+    conference_rules: str = Form("Dimensions: 48 inches wide by 36 inches height."), # Default fallback
     user_focus: str = Form("poster"), 
     images: Annotated[list[UploadFile] | None, File()] = None,
 ):
@@ -36,13 +45,7 @@ async def generate_draft(
     extracted_images = {}
     vision_metadata = None
     if images:
-        # temporarily create folder for on-the-fly image processing
-        # will implement database later
-        # get the absolute path of the directory where app.py exists
-        BASE_DIR = os.path.dirname(os.path.abspath(__file__)) # Users/kyileiaye/Desktop/Thutaytana
-        UPLOAD_DIR = os.path.join(BASE_DIR, "uploads") # join it with the folder name ; Users/kyileiaye/Desktop/Thutaytana/uploads
-        os.makedirs(UPLOAD_DIR, exist_ok = True) # create the directory
-
+        os.makedirs(UPLOAD_DIR, exist_ok=True) # recreating the folder and save the files cuz the js forget everything after uploading the files to the folder
         for img in images:
             file_path = os.path.join(UPLOAD_DIR, img.filename)
             content = await img.read()
@@ -81,6 +84,20 @@ async def generate_draft(
         'conclusion': parsed_context.conclusion
     })
     
+    conference_rule_agent = conference_parser()
+    generated_conference_rules = conference_rule_agent.invoke(conference_rules)
+    
+    w_inches = generated_conference_rules.width_inches
+    h_inches = generated_conference_rules.height_inches
+    print(f"Width: {w_inches}" )
+    print(f"Height: {h_inches}")
+    
+    # check for the 56-inch limit and create a UI warning message
+    size_warning = None
+    if w_inches > 56 or h_inches > 56:
+        size_warning = f"Your requested size ({w_inches}\" x {h_inches}\") exceeds PowerPoint's 56-inch limit. Please enter a valid width and valid height."
+        
+    parsed_rules_json = generated_conference_rules.model_dump_json()
     # return html template, passing AI generated bullet points into it
     return templates.TemplateResponse(
             request=request,
@@ -88,7 +105,9 @@ async def generate_draft(
             context={
                 "bullets": bullet_points.model_dump(), # converting bullet point object to dict
                 "vision_metadata": [v.model_dump() for v in vision_metadata] if vision_metadata else None,
-                "abstract": parsed_context.abstract
+                "abstract": parsed_context.abstract, 
+                "conference_rules": parsed_rules_json,# <-- Pass it to the next page
+                "size_warning": size_warning
             }
     )
     
@@ -102,9 +121,11 @@ async def download_pptx(
     methods: str = Form(...),
     results: str = Form(...),
     conclusion: str = Form(...),
-    vision_data: str = Form(None) 
+    vision_data: str = Form(None),
+    conference_rules: str= Form("Dimensions: 48 inches wide by 36 inches height.")
 ):
     print("DEBUG vision_data:", vision_data) 
+    # parse bullet point data
     bullet_points = PosterBulletPoints(
         title = title.strip(),
         introduction_bullets= [b for b in introduction.splitlines()],
@@ -115,6 +136,7 @@ async def download_pptx(
         conclusion_bullets=[b for b in conclusion.splitlines()],
     )
     
+    # parse figure data
     parsed_vision = None
     if vision_data:
 
@@ -129,17 +151,20 @@ async def download_pptx(
             class ImageMetaData:
                 def __init__(self, d):
                     for k, v in d.items():
+                        if k == 'image_filename':
+                            safe_filename = os.path.basename(v)
+                            v = os.path.join(UPLOAD_DIR, safe_filename)
                         setattr(self, k , v)
                         
             parsed_vision = [ImageMetaData(img) for img in vision_list]
     
     # Default conference rules
-    conference_guidelines = "Dimensions: 48 inches wide by 36 inches height."
+    # conference_guidelines = "Dimensions: 48 inches wide by 36 inches height."
     conference_rule_agent = conference_parser()
-    conference_rules = conference_rule_agent.invoke(conference_guidelines)
-
+    generated_conference_rules = conference_rule_agent.invoke(conference_rules)
+    
     output_path = "./uploads/poster_output.pptx"
-    generate_poster(bullet_points, vision_metadata=parsed_vision, conference_rules=conference_rules, output_name=output_path)
+    generate_poster(bullet_points, vision_metadata=parsed_vision, conference_rules=generated_conference_rules, output_name=output_path)
 
     return FileResponse(
         path=output_path,

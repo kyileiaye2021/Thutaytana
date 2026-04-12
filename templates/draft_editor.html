@@ -1,5 +1,15 @@
 <div class = "space-y-4 animate-fade-in">
 
+    
+    {% if size_warning %}
+    <div class="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 rounded shadow-sm">
+        <p class='font-bold flex items-center gap-2'>
+            <span>⚠️</span> Poster Size Exceeded
+        </p>
+        <p class="text-sm mt-1">{{ size_warning }}</p>
+    </div>
+    {% endif %}
+        
     <div class="mb-6">
         <label class="block text-sm font-bold text-gray-700 mb-2">Research Abstract</label>
         <textarea
@@ -29,6 +39,7 @@
     <form action="/api/download-pptx" method="POST">
         <input type="hidden" name="vision_data" value="{{ vision_metadata | tojson | forceescape }}">
 
+        <input type="hidden" name="conference_rules" value="{{ conference_rules_json | forceescape }}">
         <label>Title</label>
         <textarea name="title" class="w-full h-32 border p-2">{{ bullets.title}}</textarea>
     
@@ -49,7 +60,6 @@
 
         <label>Conclusion</label>
         <textarea name="conclusion" class="w-full h-32 border p-2">{{ bullets.conclusion_bullets | join('\n') }}</textarea>
-
 
         <button type="submit" class="w-full mt-6 bg-green-600 text-white font-bold py-3 rounded hover:bg-green-700 shadow-md">
             Export to .PPTX
